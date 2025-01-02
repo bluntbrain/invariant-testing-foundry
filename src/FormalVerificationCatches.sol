@@ -46,7 +46,7 @@ function sub(Int a, Int b) pure returns (Int) {
 }
 
 /// @title Complex Mathematical Operations Contract
-/// @author Original code
+/// @author Ishan Lakhwani
 /// @notice A contract demonstrating complex mathematical operations with intentionally confusing logic
 /// @dev This contract is designed to be difficult to reason about for testing purposes
 contract FormalVerificationCatches {
