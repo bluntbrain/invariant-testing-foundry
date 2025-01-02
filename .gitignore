@@ -1,0 +1,46 @@
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+# Coverage
+coverage/
+coverage.json
+lcov.info
+
+# Hardhat files
+artifacts/
+cache_hardhat/
+
+# Foundry
+forge-cache/
+forge-artifacts/
+
+# Node modules
+node_modules/
+
+# Mac OS
+.DS_Store
+
+# VSCode settings
+.vscode/
+
+# Local deployments
+deployments/local/
+
+# Debug files
+*.log
+debug/
+
+# Gas snapshots
+.gas-snapshot
