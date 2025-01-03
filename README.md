@@ -1,66 +1,127 @@
-## Foundry
+# Smart Contract Testing Examples
+> A comprehensive guide to Foundry's testing capabilities including Fuzz Testing and Invariant Testing
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+## Overview
+This repository demonstrates different testing methodologies in Foundry, focusing on:
+- Fuzz Testing
+- Invariant Testing
+- Stateless vs Stateful Testing
+- Handler-based Testing
 
-Foundry consists of:
+## Test Structure
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+### 1. Mock Contracts
+- `MockUSDC.sol`: Basic ERC20 implementation for testing
+- `MockWETH.sol`: WETH implementation with deposit/withdraw
+- `YieldERC20.sol`: ERC20 with fee mechanism (10% fee every 10 transactions)
 
-## Documentation
+### 2. Testing Approaches
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+#### A. Fuzz Testing
+- Automatically generates random inputs
+- Tests function behavior across many scenarios
+- Example: `testInvariantBreakHard(uint256 randomAmount)`
+```solidity
+function testInvariantBreakHard(uint256 randomAmount) public {
+    vm.assume(randomAmount < startingAmount);
+    // Test deposit/withdraw cycles
+}
 ```
 
-### Test
+#### B. Invariant Testing
+Two main approaches:
 
-```shell
-$ forge test
+1. **Stateless Testing**
+- Tests individual function calls
+- No state maintained between calls
+- Limited in catching complex bugs
+```solidity
+// Example in StatelessFuzzCatchesTest.t.sol
 ```
 
-### Format
-
-```shell
-$ forge fmt
+2. **Stateful Testing**
+- Maintains state between function calls
+- Tests sequences of operations
+- Better at finding complex bugs
+```solidity
+// Example in StatefulFuzzCatchesTest.t.sol
 ```
 
-### Gas Snapshots
+#### C. Handler Pattern
+Located in `test/invariant/HandlerStatefulFuzz/`
 
-```shell
-$ forge snapshot
+1. **Handler Contract**
+- Controls test flow
+- Bounds input values
+- Manages function sequences
+```solidity
+function depositYeildERC20(uint256 _amount) public {
+    uint256 amount = bound(_amount, 0, yeildERC20.balanceOf(owner));
+    // ... deposit logic
+}
 ```
 
-### Anvil
-
-```shell
-$ anvil
+2. **Invariant Tests with Handler**
+```solidity
+contract InvariantBreakHardTest {
+    function setUp() public {
+        // Setup handler and target selectors
+        targetSelector(FuzzSelector({
+            addr: address(handler),
+            selectors: selectors
+        }));
+    }
+}
 ```
 
-### Deploy
+## Key Features
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+### Invariant Properties Tested
+- Token balances after operations
+- Ownership consistency
+- Fee mechanism correctness
+
+### Test Coverage
+- Deposit/Withdraw cycles
+- Fee calculations
+- Balance tracking
+- Owner operations
+
+## Running Tests
+
+```bash
+# Run all tests
+forge test
+
+# Run specific test file
+forge test --match-path test/invariant/HandlerStatefulFuzz/Invariant.t.sol
+
+# Run with verbosity
+forge test -vvv
 ```
 
-### Cast
+## Key Learnings
+1. Simple fuzz testing may miss complex bugs
+2. Stateful testing with handlers provides better coverage
+3. Invariant testing helps verify persistent properties
+4. Handlers help control test flow and bound inputs
 
-```shell
-$ cast <subcommand>
+## Project Structure
+```
+├── src/
+│   └── HandlerStatefulFuzzCatches.sol
+├── test/
+│   ├── mocks/
+│   │   ├── MockUSDC.sol
+│   │   ├── MockWETH.sol
+│   │   └── YeildERC20.sol
+│   └── invariant/
+│       └── HandlerStatefulFuzz/
+│           ├── Handler.t.sol
+│           ├── Invariant.t.sol
+│           └── InvariantFail.t.sol
 ```
 
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+## Dependencies
+- Foundry
+- OpenZeppelin Contracts
